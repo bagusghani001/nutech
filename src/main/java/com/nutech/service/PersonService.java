@@ -14,50 +14,51 @@ import org.springframework.stereotype.Service;
 
 import com.nutech.dto.PersonDTO;
 import com.nutech.dto.ResponseDTO;
-
-import lombok.extern.slf4j.Slf4j;
+import com.nutech.dto.ResponseDTO.Person;
 
 @Service
-@Slf4j
 public class PersonService {
-    
-    //membuat add person
 
-    private List<PersonDTO> listPerson = new ArrayList<>();
+    List<PersonDTO> listPerson = new ArrayList<>();
 
     ResponseDTO response = new ResponseDTO();
-    
-    public ResponseDTO addPerson(PersonDTO request){
-        if(isValidData(request)){
-            //cek kalau valid akan di tambahkan /di masukan ke file profile.txt
+    Person person = new Person();
+
+    // membuat add person
+    public ResponseDTO addPerson(PersonDTO request) {
+        if (isValidData(request)) {
+            // cek kalau valid akan di tambahkan /di masukan ke file profile.txt
             listPerson.add(request);
             writePerson(request);
+            // set value ke class person dari paramater request
+            person.setName(request.getName());
+            person.setNik(request.getNik());
+            person.setTanggalLahir(request.getTanggalLahir());
+
             response.setError("false");
             response.setMessage("sukses");
-            response.setValue(listPerson.stream().map(PersonDTO::toString).collect(Collectors.toList()));
+            response.setValue(person);
             return response;
-        }else{
+        } else {
             throw new IllegalArgumentException("Invalid Request");
         }
     }
 
-    public ResponseDTO getListPerson(){
-        response.setError("false");
-        response.setMessage("sukses");
-        response.setValue(listPerson.stream().map(PersonDTO::toString).collect(Collectors.toList()));
-        return response;
+    // mengambil semua data yang sudah di post dari request
+    public List<PersonDTO> getListPerson() {
+        return listPerson;
     }
 
-    //function validasi cek data request 
-    public boolean isValidData(PersonDTO request){
-        return request.getName()!=null && request.getNik()!=null && request.getTanggalLahir()!=null;
+    // function validasi cek data request
+    public boolean isValidData(PersonDTO request) {
+        return request.getName() != null && request.getNik() != null && request.getTanggalLahir() != null;
     }
 
-    //Function Menulis Person
-    public void writePerson(PersonDTO request){
-        try (BufferedWriter writer= new BufferedWriter(new FileWriter("../resource/profile.txt"))) {
+    // Function Menulis Person
+    public void writePerson(PersonDTO request) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/resources/profile.txt", true))) {
             String formatDates = formatDate(request.getTanggalLahir());
-            String line = String.valueOf(request.getNik()) + ","+request.getName()+","+formatDates;
+            String line = String.valueOf(request.getNik()) + "," + request.getName() + "," + formatDates;
             writer.write(line);
             writer.newLine();
         } catch (Exception e) {
@@ -65,15 +66,15 @@ public class PersonService {
         }
     }
 
-    //function formatiing date 
-    public String formatDate(LocalDate date){
+    // function formatiing date
+    public String formatDate(LocalDate date) {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return date.format(dtf);
     }
 
-    //function untuk membaca file
-    public String readFile(){
-        try (BufferedReader read = new BufferedReader(new FileReader("../resource/profile.txt"))) {
+    // function untuk membaca file
+    public String readFile() {
+        try (BufferedReader read = new BufferedReader(new FileReader("src/main/resources/profile.txt"))) {
             return read.lines().collect(Collectors.joining("\n"));
         } catch (Exception e) {
             // TODO: handle exception
@@ -81,6 +82,5 @@ public class PersonService {
             throw new RuntimeException("File tidak ada/ tidak kebaca");
         }
     }
-
 
 }

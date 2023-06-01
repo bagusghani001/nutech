@@ -14,10 +14,6 @@ import lombok.NoArgsConstructor;
 public class PersonDTO {
     private String name;
     private Integer nik;
-    private LocalDate tanggalLahir; 
-    
+    private LocalDate tanggalLahir;
 
-
-
-    }
-   
+}
